@@ -29,18 +29,14 @@ export UVICORN_SSL_CERTFILE="$CERT"
 export UVICORN_SSL_KEYFILE="$KEY"
 export UVICORN_SSL_CA_TYPE=private
 
-echo ">> Starting PasarGuard on HTTPS port 8000..."
+echo ">> Starting PasarGuard..."
 
 python main.py &
-PASARGUARD_PID=$!
 
-echo ">> Waiting for PasarGuard..."
+sleep 5
 
-sleep 3
+echo ">> Starting Nginx on port ${PORT:-8080}..."
 
-echo ">> Starting Nginx on Railway port 8080..."
+sed -i "s/listen 0.0.0.0:8080/listen 0.0.0.0:${PORT:-8080}/" /etc/nginx/nginx.conf
 
-nginx -g "daemon off;" &
-NGINX_PID=$!
-
-wait "$PASARGUARD_PID" "$NGINX_PID"
+exec nginx -g "daemon off;"
